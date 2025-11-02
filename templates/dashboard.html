@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Data Analytics Dashboard</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         * {
@@ -14,10 +8,12 @@
         }
 
         body {
-            font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 50%, #3d3d5c 100%);
-            color: #ffffff;
+            font-family: "Segoe UI", "Inter", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #323130;
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
 
         .dashboard-container {
@@ -25,25 +21,24 @@
             min-height: 100vh;
         }
 
-        /* Enhanced Sidebar */
+        /* Power BI Style Sidebar */
         .sidebar {
             width: 280px;
-            background: rgba(30, 30, 46, 0.95);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            background: #ffffff;
+            border-right: 1px solid #e1dfdd;
             display: flex;
             flex-direction: column;
             position: fixed;
             height: 100vh;
             z-index: 1000;
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar-header {
             padding: 30px 20px;
             text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-bottom: 1px solid #e1dfdd;
+            background: #0078d4;
         }
 
         .sidebar-header i {
@@ -117,8 +112,9 @@
         .main-content {
             flex: 1;
             margin-left: 280px;
-            padding: 30px;
+            padding: 20px;
             overflow-y: auto;
+            background: #f8f9fa;
         }
 
         .dashboard-header {
@@ -202,19 +198,19 @@
         }
 
         .kpi-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 25px;
+            background: #ffffff;
+            border: 1px solid #e1dfdd;
+            border-radius: 8px;
+            padding: 20px;
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .kpi-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .kpi-card::before {
@@ -224,7 +220,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+            background: #0078d4;
         }
 
         .kpi-header {
@@ -273,6 +269,18 @@
             color: #ef4444;
         }
 
+        .kpi-change.warning {
+            color: #f59e0b;
+        }
+
+        .kpi-change.info {
+            color: #6366f1;
+        }
+
+        .kpi-change.neutral {
+            color: #94a3b8;
+        }
+
         /* Charts Grid */
         .charts-grid {
             display: grid;
@@ -282,17 +290,17 @@
         }
 
         .chart-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 25px;
+            background: #ffffff;
+            border: 1px solid #e1dfdd;
+            border-radius: 8px;
+            padding: 20px;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .chart-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .chart-header {
@@ -950,18 +958,25 @@
             formData.append('file', file);
 
             try {
-                // Simulate file upload and processing
-                await simulateFileProcessing();
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Upload failed');
+                }
+
+                const data = await response.json();
+                currentData = data;
                 
-                // Generate sample data for demonstration
-                const sampleData = generateSampleData();
-                currentData = sampleData;
-                
-                // Update dashboard with sample data
-                updateDashboard(sampleData);
-                showSuccessMessage(`File "${file.name}" processed successfully!`);
+                // Update dashboard with real data
+                updateDashboard(data);
+                showSuccessMessage(`File "${file.name}" processed successfully! Generated ${data.charts ? data.charts.length : 0} smart visualizations.`);
                 
             } catch (error) {
+                console.error('Upload error:', error);
                 showErrorMessage('Error processing file: ' + error.message);
             } finally {
                 hideProgress();
@@ -992,92 +1007,6 @@
             return true;
         }
 
-        async function simulateFileProcessing() {
-            // Simulate processing time
-            await new Promise(resolve => setTimeout(resolve, 3000));
-        }
-
-        function generateSampleData() {
-            return {
-                basic_stats: {
-                    original_rows: 15420,
-                    columns: 12,
-                    numeric_columns: 7,
-                    categorical_columns: 4,
-                    datetime_columns: 1
-                },
-                kpis: [
-                    { title: 'Total Records', value: '15,420', icon: 'database', change: '+12.5%' },
-                    { title: 'Total Columns', value: '12', icon: 'columns', change: 'Detected' },
-                    { title: 'Numeric Columns', value: '7', icon: 'calculator', change: 'Auto-detected' },
-                    { title: 'Data Quality', value: '98.5%', icon: 'check-circle', change: '+2.1%' }
-                ],
-                charts: [
-                    {
-                        title: 'Sales Trend Analysis',
-                        type: 'line',
-                        data: generateTimeSeriesData()
-                    },
-                    {
-                        title: 'Category Distribution',
-                        type: 'pie',
-                        data: generatePieData()
-                    },
-                    {
-                        title: 'Performance Metrics',
-                        type: 'bar',
-                        data: generateBarData()
-                    },
-                    {
-                        title: 'Correlation Heatmap',
-                        type: 'heatmap',
-                        data: generateHeatmapData()
-                    }
-                ]
-            };
-        }
-
-        function generateTimeSeriesData() {
-            const data = [];
-            const categories = [];
-            for (let i = 0; i < 12; i++) {
-                const date = new Date();
-                date.setMonth(date.getMonth() - 11 + i);
-                categories.push(date.toLocaleDateString('en', { month: 'short' }));
-                data.push(Math.floor(Math.random() * 1000) + 500);
-            }
-            return { categories, data };
-        }
-
-        function generatePieData() {
-            return {
-                labels: ['Sales', 'Marketing', 'Support', 'Development'],
-                data: [35, 25, 20, 20],
-                colors: ['#6366f1', '#8b5cf6', '#ec4899', '#10b981']
-            };
-        }
-
-        function generateBarData() {
-            return {
-                categories: ['Q1', 'Q2', 'Q3', 'Q4'],
-                series: [
-                    { name: 'Revenue', data: [450, 520, 680, 590] },
-                    { name: 'Profit', data: [180, 230, 320, 280] }
-                ]
-            };
-        }
-
-        function generateHeatmapData() {
-            const variables = ['Sales', 'Marketing', 'Support', 'Revenue', 'Profit'];
-            const data = [];
-            for (let i = 0; i < variables.length; i++) {
-                for (let j = 0; j < variables.length; j++) {
-                    data.push([i, j, Math.random()]);
-                }
-            }
-            return { variables, data };
-        }
-
         function updateDashboard(data) {
             updateKPIs(data.kpis);
             updateOverviewCharts(data.charts);
@@ -1085,25 +1014,80 @@
         }
 
         function updateKPIs(kpis) {
+            // Fallback to basic stats if no kpis
+            if (!kpis || kpis.length === 0) {
+                kpis = [
+                    { title: 'Total Records', value: currentData.basic_stats.original_rows.toLocaleString(), icon: 'database', change: 'Loaded', change_type: 'positive' },
+                    { title: 'Total Columns', value: currentData.basic_stats.columns.toString(), icon: 'columns', change: 'Detected', change_type: 'info' },
+                    { title: 'Numeric Columns', value: currentData.basic_stats.numeric_columns.toString(), icon: 'calculator', change: 'Auto-detected', change_type: 'info' },
+                    { title: 'Data Quality', value: 'Analyzed', icon: 'check-circle', change: 'Complete', change_type: 'positive' }
+                ];
+            }
+
             const kpiGrid = document.getElementById('kpiGrid');
-            kpiGrid.innerHTML = kpis.map(kpi => `
-                <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-icon">
-                            <i class="fas fa-${kpi.icon}"></i>
+            kpiGrid.innerHTML = kpis.map(kpi => {
+                const changeType = kpi.change_type || 'positive';
+                const changeIcon = getChangeIcon(changeType);
+                
+                return `
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon">
+                                <i class="fas fa-${kpi.icon || 'circle'}"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value">${kpi.value}</div>
+                        <div class="kpi-label">${kpi.title}</div>
+                        <div class="kpi-change ${changeType}">
+                            <i class="fas fa-${changeIcon}"></i>
+                            <span>${kpi.change || 'Updated'}</span>
                         </div>
                     </div>
-                    <div class="kpi-value">${kpi.value}</div>
-                    <div class="kpi-label">${kpi.title}</div>
-                    <div class="kpi-change positive">
-                        <i class="fas fa-arrow-up"></i>
-                        <span>${kpi.change}</span>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+        }
+
+        function getChangeIcon(changeType) {
+            const iconMap = {
+                'positive': 'arrow-up',
+                'negative': 'arrow-down',
+                'warning': 'exclamation-triangle',
+                'info': 'info-circle',
+                'neutral': 'minus'
+            };
+            return iconMap[changeType] || 'info-circle';
         }
 
         function updateOverviewCharts(charts) {
+            if (!charts || charts.length === 0) {
+                // Show placeholder if no charts
+                const chartsGrid = document.getElementById('overviewChartsGrid');
+                chartsGrid.innerHTML = `
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Data Overview</h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                                <button class="chart-btn">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #94a3b8;">
+                                <div style="text-align: center;">
+                                    <i class="fas fa-chart-bar" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                                    <p>Smart visualizations generated based on your data</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
             const chartsGrid = document.getElementById('overviewChartsGrid');
             chartsGrid.innerHTML = charts.slice(0, 2).map((chart, index) => `
                 <div class="chart-card">
@@ -1131,14 +1115,15 @@
         }
 
         function updateAllSections(data) {
-            // Update Analytics section
+            // Update Analytics section with real EDA report
+            const eda = data.eda_report || {};
             document.getElementById('analyticsContent').innerHTML = `
                 <div class="data-table-container">
                     <div class="table-header">
-                        <h3><i class="fas fa-table"></i> Dataset Summary</h3>
-                        <button class="btn btn-secondary">
+                        <h3><i class="fas fa-table"></i> Dataset Summary & EDA</h3>
+                        <button class="btn btn-secondary" onclick="exportData()">
                             <i class="fas fa-download"></i>
-                            Export Data
+                            Export Summary
                         </button>
                     </div>
                     <table class="data-table">
@@ -1170,15 +1155,25 @@
                                 <td>${data.basic_stats.categorical_columns}</td>
                                 <td>Qualitative variables</td>
                             </tr>
+                            ${eda.missing_values ? `<tr><td>Missing Values</td><td>${Object.values(eda.missing_values).reduce((sum, v) => sum + v, 0)}</td><td>Total missing data points</td></tr>` : ''}
+                            ${eda.correlations ? `<tr><td>Strong Correlations</td><td>${eda.correlations.strong_correlations ? eda.correlations.strong_correlations.length : 0}</td><td>Pairs with |r| > 0.7</td></tr>` : ''}
                         </tbody>
                     </table>
                 </div>
+                ${data.cleaning_report ? `
+                <div class="data-table-container" style="margin-top: 20px;">
+                    <div class="table-header">
+                        <h3><i class="fas fa-broom"></i> Data Cleaning Report</h3>
+                    </div>
+                    <div style="padding: 20px; color: #94a3b8;">${data.cleaning_report}</div>
+                </div>
+                ` : ''}
             `;
 
-            // Update Visualizations section
+            // Update Visualizations section with all real charts
             document.getElementById('visualizationsContent').innerHTML = `
                 <div class="charts-grid">
-                    ${data.charts.map((chart, index) => `
+                    ${data.charts ? data.charts.map((chart, index) => `
                         <div class="chart-card">
                             <div class="chart-header">
                                 <h3 class="chart-title">${chart.title}</h3>
@@ -1193,135 +1188,114 @@
                             </div>
                             <div class="chart-container" id="viz-chart-${index}"></div>
                         </div>
-                    `).join('')}
+                    `).join('') : '<p>No visualizations generated yet.</p>'}
                 </div>
             `;
 
             // Render all visualization charts
             setTimeout(() => {
-                data.charts.forEach((chart, index) => {
-                    renderChart(`viz-chart-${index}`, chart);
-                });
+                if (data.charts) {
+                    data.charts.forEach((chart, index) => {
+                        renderChart(`viz-chart-${index}`, chart);
+                    });
+                }
             }, 100);
 
-            // Update other sections similarly...
+            // Update Insights section
+            document.getElementById('insightsContent').innerHTML = `
+                <div style="display: grid; gap: 20px;">
+                    ${data.insights ? data.insights.map(insight => `
+                        <div class="message ${insight.type || 'info'}">
+                            <i class="fas fa-${getInsightIcon(insight.type)}"></i>
+                            <div>
+                                <h4 style="color: #ffffff; margin-bottom: 5px;">${insight.title}</h4>
+                                <p>${insight.description}</p>
+                                ${insight.details ? `<ul style="margin: 5px 0; padding-left: 20px;">${insight.details.map(d => `<li>${d}</li>`).join('')}</ul>` : ''}
+                            </div>
+                        </div>
+                    `).join('') : '<p>No insights generated yet.</p>'}
+                </div>
+            `;
+
+            // Update Reports section
+            document.getElementById('reportsContent').innerHTML = `
+                <div class="data-table-container">
+                    <div class="table-header">
+                        <h3><i class="fas fa-file-pdf"></i> Generated Reports</h3>
+                        ${data.pdf_report ? `<button class="btn btn-primary" onclick="downloadReport('${data.pdf_report}')"><i class="fas fa-download"></i> Download PDF Report</button>` : ''}
+                    </div>
+                    ${data.pdf_report ? `
+                    <div style="padding: 20px;">
+                        <p><strong>Report:</strong> ${data.pdf_report}</p>
+                        <p>Comprehensive EDA and visualization report generated successfully.</p>
+                    </div>
+                    ` : '<p>Upload data to generate reports.</p>'}
+                </div>
+            `;
+        }
+
+        function getInsightIcon(type) {
+            const icons = {
+                'info': 'info-circle',
+                'success': 'check-circle',
+                'warning': 'exclamation-triangle',
+                'insight': 'lightbulb'
+            };
+            return icons[type] || 'info-circle';
+        }
+
+        function exportData() {
+            if (currentData) {
+                const dataStr = JSON.stringify(currentData.eda_report, null, 2);
+                const blob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'eda-summary.json';
+                link.click();
+                URL.revokeObjectURL(url);
+            }
         }
 
         function renderChart(containerId, chartData) {
             const container = document.getElementById(containerId);
             if (!container) return;
 
-            switch (chartData.type) {
-                case 'line':
-                    renderLineChart(container, chartData);
-                    break;
-                case 'pie':
-                    renderPieChart(container, chartData);
-                    break;
-                case 'bar':
-                    renderBarChart(container, chartData);
-                    break;
-                case 'heatmap':
-                    renderHeatmapChart(container, chartData);
-                    break;
-                default:
-                    container.innerHTML = '<p>Chart type not supported</p>';
-            }
-        }
+            // Backend provides Plotly fig as dict with 'data' and 'layout' keys
+            // Assume chartData.fig is the Plotly figure dict (serialized)
+            let fig = chartData.fig || chartData.data;
 
-        function renderLineChart(container, chartData) {
-            const trace = {
-                x: chartData.data.categories,
-                y: chartData.data.data,
-                type: 'scatter',
-                mode: 'lines+markers',
-                line: { color: '#6366f1', width: 3 },
-                marker: { color: '#6366f1', size: 8 }
-            };
-
-            const layout = {
-                plot_bgcolor: 'transparent',
-                paper_bgcolor: 'transparent',
-                font: { color: '#ffffff' },
-                xaxis: { gridcolor: 'rgba(255,255,255,0.1)' },
-                yaxis: { gridcolor: 'rgba(255,255,255,0.1)' },
-                margin: { t: 20, r: 20, b: 40, l: 60 }
-            };
-
-            Plotly.newPlot(container, [trace], layout, { responsive: true, displayModeBar: false });
-        }
-
-        function renderPieChart(container, chartData) {
-            const trace = {
-                labels: chartData.data.labels,
-                values: chartData.data.data,
-                type: 'pie',
-                marker: {
-                    colors: chartData.data.colors
-                },
-                textinfo: 'label+percent',
-                textfont: { color: '#ffffff' }
-            };
-
-            const layout = {
-                plot_bgcolor: 'transparent',
-                paper_bgcolor: 'transparent',
-                font: { color: '#ffffff' },
-                margin: { t: 20, r: 20, b: 20, l: 20 }
-            };
-
-            Plotly.newPlot(container, [trace], layout, { responsive: true, displayModeBar: false });
-        }
-
-        function renderBarChart(container, chartData) {
-            const traces = chartData.data.series.map((series, index) => ({
-                x: chartData.data.categories,
-                y: series.data,
-                type: 'bar',
-                name: series.name,
-                marker: { color: index === 0 ? '#6366f1' : '#8b5cf6' }
-            }));
-
-            const layout = {
-                plot_bgcolor: 'transparent',
-                paper_bgcolor: 'transparent',
-                font: { color: '#ffffff' },
-                xaxis: { gridcolor: 'rgba(255,255,255,0.1)' },
-                yaxis: { gridcolor: 'rgba(255,255,255,0.1)' },
-                margin: { t: 20, r: 20, b: 40, l: 60 },
-                barmode: 'group'
-            };
-
-            Plotly.newPlot(container, traces, layout, { responsive: true, displayModeBar: false });
-        }
-
-        function renderHeatmapChart(container, chartData) {
-            const z = [];
-            for (let i = 0; i < chartData.data.variables.length; i++) {
-                z[i] = [];
-                for (let j = 0; j < chartData.data.variables.length; j++) {
-                    const dataPoint = chartData.data.data.find(d => d[0] === i && d[1] === j);
-                    z[i][j] = dataPoint ? dataPoint[2] : 0;
+            if (typeof fig === 'string') {
+                try {
+                    fig = JSON.parse(fig);
+                } catch (e) {
+                    console.error('Error parsing chart fig:', e);
+                    container.innerHTML = '<p>Error rendering chart</p>';
+                    return;
                 }
             }
 
-            const trace = {
-                z: z,
-                x: chartData.data.variables,
-                y: chartData.data.variables,
-                type: 'heatmap',
-                colorscale: 'Viridis'
-            };
+            if (fig && fig.data && fig.layout) {
+                // Power BI styled layout is already applied in backend
+                const powerBILayout = {
+                    ...fig.layout,
+                    yaxis: { ...fig.layout.yaxis, gridcolor: 'rgba(255,255,255,0.1)', title_font: { color: '#ffffff' }, tickfont: { color: '#ffffff' } },
+                    margin: fig.layout.margin || { t: 40, r: 20, b: 40, l: 60 }
+                };
 
-            const layout = {
-                plot_bgcolor: 'transparent',
-                paper_bgcolor: 'transparent',
-                font: { color: '#ffffff' },
-                margin: { t: 20, r: 20, b: 60, l: 60 }
-            };
+                Plotly.newPlot(container, fig.data, powerBILayout, { 
+                    responsive: true, 
+                    displayModeBar: false,
+                    modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d']
+                });
+                return;
+            }
 
-            Plotly.newPlot(container, [trace], layout, { responsive: true, displayModeBar: false });
+            // Fallback if no fig (for compatibility, though backend should provide)
+            container.innerHTML = '<p>Chart data not available</p>';
         }
+
+
 
         // Modal functions
         function openVisualizationDashboard() {
@@ -1339,81 +1313,75 @@
         }
 
         function loadVisualizationDashboard() {
+            if (!currentData || !currentData.charts) {
+                document.getElementById('visualizationDashboardContent').innerHTML = `
+                    <div style="text-align: center; padding: 50px; color: #94a3b8;">
+                        <i class="fas fa-chart-line" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.3;"></i>
+                        <h3>Advanced Visualization Dashboard</h3>
+                        <p>Upload data to access comprehensive visualization tools</p>
+                    </div>
+                `;
+                return;
+            }
+
             const content = document.getElementById('visualizationDashboardContent');
             content.innerHTML = `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 100%;">
                     <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <div class="chart-card" style="flex: 1;">
-                            <div class="chart-header">
-                                <h3 class="chart-title">Interactive Sales Analysis</h3>
-                                <div class="chart-actions">
-                                    <button class="chart-btn"><i class="fas fa-cog"></i></button>
-                                    <button class="chart-btn"><i class="fas fa-download"></i></button>
+                        ${currentData.charts.slice(0, 2).map((chart, index) => `
+                            <div class="chart-card" style="flex: 1;">
+                                <div class="chart-header">
+                                    <h3 class="chart-title">${chart.title}</h3>
+                                    <div class="chart-actions">
+                                        <button class="chart-btn"><i class="fas fa-cog"></i></button>
+                                        <button class="chart-btn" onclick="downloadChart(${index})"><i class="fas fa-download"></i></button>
+                                    </div>
                                 </div>
+                                <div class="chart-container" id="modal-chart-${index + 1}"></div>
                             </div>
-                            <div class="chart-container" id="modal-chart-1"></div>
-                        </div>
-                        <div class="chart-card" style="flex: 1;">
-                            <div class="chart-header">
-                                <h3 class="chart-title">Performance Metrics</h3>
-                                <div class="chart-actions">
-                                    <button class="chart-btn"><i class="fas fa-cog"></i></button>
-                                    <button class="chart-btn"><i class="fas fa-download"></i></button>
-                                </div>
-                            </div>
-                            <div class="chart-container" id="modal-chart-2"></div>
-                        </div>
+                        `).join('')}
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <div class="chart-card" style="flex: 1;">
-                            <div class="chart-header">
-                                <h3 class="chart-title">Category Breakdown</h3>
-                                <div class="chart-actions">
-                                    <button class="chart-btn"><i class="fas fa-cog"></i></button>
-                                    <button class="chart-btn"><i class="fas fa-download"></i></button>
+                        ${currentData.charts.slice(2, 4).map((chart, index) => `
+                            <div class="chart-card" style="flex: 1;">
+                                <div class="chart-header">
+                                    <h3 class="chart-title">${chart.title}</h3>
+                                    <div class="chart-actions">
+                                        <button class="chart-btn"><i class="fas fa-cog"></i></button>
+                                        <button class="chart-btn" onclick="downloadChart(${index + 2})"><i class="fas fa-download"></i></button>
+                                    </div>
                                 </div>
+                                <div class="chart-container" id="modal-chart-${index + 3}"></div>
                             </div>
-                            <div class="chart-container" id="modal-chart-3"></div>
-                        </div>
-                        <div class="chart-card" style="flex: 1;">
-                            <div class="chart-header">
-                                <h3 class="chart-title">Correlation Matrix</h3>
-                                <div class="chart-actions">
-                                    <button class="chart-btn"><i class="fas fa-cog"></i></button>
-                                    <button class="chart-btn"><i class="fas fa-download"></i></button>
-                                </div>
-                            </div>
-                            <div class="chart-container" id="modal-chart-4"></div>
-                        </div>
+                        `).join('')}
                     </div>
                 </div>
             `;
 
             // Render charts in modal
             setTimeout(() => {
-                if (currentData && currentData.charts) {
-                    currentData.charts.forEach((chart, index) => {
-                        if (index < 4) {
-                            renderChart(`modal-chart-${index + 1}`, chart);
-                        }
-                    });
-                }
+                currentData.charts.slice(0, 4).forEach((chart, index) => {
+                    renderChart(`modal-chart-${index + 1}`, chart);
+                });
             }, 100);
         }
 
         function downloadEDAReport() {
-            if (!currentData) {
-                showErrorMessage('No data available. Please upload a dataset first.');
+            if (!currentData || !currentData.pdf_report) {
+                showErrorMessage('No report available. Please upload a dataset first.');
                 return;
             }
 
-            // Simulate PDF download
-            const link = document.createElement('a');
-            link.href = 'data:application/pdf;base64,JVBERi0xLjQKJcfsj6IKNSAwIG9iago8PAovVHlwZSAvWFJlZgovU2l6ZSA2Ci9Sb290IDEgMCBSCj4+CnN0YXJ0eHJlZgo2OTQKJSVFT0Y='; // Sample PDF base64
-            link.download = 'eda-report.pdf';
-            link.click();
-            
-            showSuccessMessage('EDA Report downloaded successfully!');
+            // Download real PDF from backend
+            window.location.href = `/api/download_report/${currentData.pdf_report}`;
+            showSuccessMessage('Downloading EDA Report...');
+        }
+
+        function downloadReport(filename) {
+            if (filename) {
+                window.location.href = `/api/download_report/${filename}`;
+                showSuccessMessage('Downloading report...');
+            }
         }
 
         // Progress functions
